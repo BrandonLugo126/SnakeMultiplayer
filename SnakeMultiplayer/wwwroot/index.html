@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game - Modo Local</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="menu" class="menu">
+            <h1>🐍 SNAKE </h1>
+            <div class="input-group">
+                <label>Jugador 1 (WASD):</label>
+                <input type="text" id="player1Name" placeholder="Nombre Jugador 1" maxlength="20">
+            </div>
+            <button id="startBtn" class="btn">▶ INICIAR JUEGO</button>
+        </div>
+
+        <div id="game" style="display:none;">
+            <div class="game-header">
+                <div class="score" id="score1">Jugador 1: 0</div>
+                <div class="score" id="score2">Jugador 2: 0</div>
+            </div>
+            <canvas id="gameCanvas" width="600" height="450"></canvas>
+            <div id="message" class="message"></div>
+            <button id="backBtn" class="btn back-btn">◀ VOLVER AL MENÚ</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script src="game_local.js"></script>
+</body>
+</html>
