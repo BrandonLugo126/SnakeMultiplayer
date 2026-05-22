@@ -13,7 +13,7 @@ namespace SnakeMultiplayer.Models
     {
         public Point Manzana { get; set; }
         int ancho = 20;
-        int alto = 15;
+        int largo = 15;
         public List<Point> Serpiente1 { get; set; } = [];
         public List<Point> Serpiente2 { get; set; } = [];
         public bool Terminado { get; set; } 
@@ -22,6 +22,7 @@ namespace SnakeMultiplayer.Models
         public int Puntos2 {  get; set; }
         public Direccion Direccion1 { get; set; }
         public Direccion Direccion2 { get; set; }
-
+        public int Ancho { get => ancho; set => ancho = value; }
+        public int Largo { get => largo; set => largo = value; }
     }
 }

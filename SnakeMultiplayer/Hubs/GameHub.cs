@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using SnakeMultiplayer.Models;
 using SnakeMultiplayer.Services;
 
 namespace SnakeMultiplayer.Hubs
@@ -9,7 +10,16 @@ namespace SnakeMultiplayer.Hubs
         public GameHub(SalaService service)
         {
             this.service = service;
-        } 
+            service.TableroActualizado += Service_TableroActualizado    ;
+        }
+
+        private async void Service_TableroActualizado(Sala sala)
+        {
+            if (sala.IdJugador1 != null)
+                await Clients.Client(sala.IdJugador1).SendAsync("TableroActualizado", sala.Tablero);
+            if (sala.IdJugador2 != null)
+                await Clients.Client(sala.IdJugador2).SendAsync("TableroActualizado", sala.Tablero);
+        }
 
         public async Task Conectar(string nombreJugador)
         {
