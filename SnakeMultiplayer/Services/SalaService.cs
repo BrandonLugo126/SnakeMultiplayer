@@ -18,6 +18,11 @@ namespace SnakeMultiplayer.Services
             this.hub = hub;
 
         }
+
+        public Sala Buscar(string idJugador)
+        {
+            return Salas.FirstOrDefault(x=>x.Value.IdJugador1==idJugador|| x.Value.IdJugador2==idJugador).Value;
+        }
         public Sala? BuscarSala(string id, string nombre)
         {
             if (JugadorEspera.ContainsKey(id))
@@ -151,6 +156,63 @@ namespace SnakeMultiplayer.Services
             while (sala.Tablero.Serpiente1.Any(x => x.X == point.X && x.Y == point.Y) || sala.Tablero.Serpiente2.Any(x => x.X == point.X && x.Y == point.Y));
             {
                 sala.Tablero.Manzana = point;
+            }
+        }
+
+        public void CambiarDireccion(Sala sala, string id, Direccion nueva)
+        {
+            if (sala.IdJugador1==id)
+            {
+                var actual = sala.Tablero.Direccion1;
+                switch (nueva)
+                {
+                    case Direccion.Arriba:
+                        if (actual != Direccion.Abajo)                        
+                            sala.Tablero.Direccion1 = nueva;
+                        
+                        break;
+                    case Direccion.Abajo:
+                        if (actual != Direccion.Arriba)
+                            sala.Tablero.Direccion1 = nueva;
+                        break;
+                    case Direccion.Izquierda:
+                        if (actual != Direccion.Derecha)
+                            sala.Tablero.Direccion1 = nueva;
+                        break;
+                    case Direccion.Derecha:
+                        if (actual != Direccion.Izquierda)
+                            sala.Tablero.Direccion1 = nueva;
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+            else
+            {
+                var actual = sala.Tablero.Direccion2;
+                switch (nueva)
+                {
+                    case Direccion.Arriba:
+                        if (actual != Direccion.Abajo)
+                            sala.Tablero.Direccion2= nueva;
+
+                        break;
+                    case Direccion.Abajo:
+                        if (actual != Direccion.Arriba)
+                            sala.Tablero.Direccion2 = nueva;
+                        break;
+                    case Direccion.Izquierda:
+                        if (actual != Direccion.Derecha)
+                            sala.Tablero.Direccion2 = nueva;
+                        break;
+                    case Direccion.Derecha:
+                        if (actual != Direccion.Izquierda)
+                            sala.Tablero.Direccion2 = nueva;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }

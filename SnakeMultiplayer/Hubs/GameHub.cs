@@ -33,5 +33,18 @@ namespace SnakeMultiplayer.Hubs
                 }
             }
         }
+
+        public async Task Mover(string nombreJugador,string direccion)
+        {
+            var id = Context.ConnectionId;
+            var sala = service.Buscar(id);
+
+            if (sala!=null)
+            {
+                var dir =(Direccion)Enum.Parse(typeof(Direccion), direccion);
+
+                service.CambiarDireccion(sala,id,dir);
+            }
+        }
     }
 }

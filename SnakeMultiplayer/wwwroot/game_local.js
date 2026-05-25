@@ -68,6 +68,7 @@ connection.on("JuegoIniciado", (nombreJugador2,tablero) => {
     canvas = document.getElementById("gameCanvas");
     ctx = canvas.getContext("2d");
     drawGame(tablero);
+    gameRunning = true;
 
 });
 
@@ -88,7 +89,7 @@ async function  startGame() {
 
     // initGame();
     // gameLoop = setInterval(updateGame, 150);
-    // gameRunning = true;
+    // 
 }
 
 function backToMenu() {
@@ -269,28 +270,19 @@ function drawGame(tablero) {
     ctx.fillRect(tablero.manzana.x * CELL_SIZE, tablero.manzana.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
 }
 
-function handleKeyPress(e) {
+async function handleKeyPress(e) {
     if (!gameRunning) return;
 
     const key = e.key;
 
-    if (key === "w" || key === "W") {
-        if (direction1 !== "DOWN") nextDirection1 = "UP";
-    } else if (key === "s" || key === "S") {
-        if (direction1 !== "UP") nextDirection1 = "DOWN";
-    } else if (key === "a" || key === "A") {
-        if (direction1 !== "RIGHT") nextDirection1 = "LEFT";
-    } else if (key === "d" || key === "D") {
-        if (direction1 !== "LEFT") nextDirection1 = "RIGHT";
-    }
 
     if (key === "ArrowUp") {
-        if (direction2 !== "DOWN") nextDirection2 = "UP";
+        await connection.invoke("Mover",player1Name,"Arriba")
     } else if (key === "ArrowDown") {
-        if (direction2 !== "UP") nextDirection2 = "DOWN";
+        await connection.invoke("Mover", player1Name, "Abajo")
     } else if (key === "ArrowLeft") {
-        if (direction2 !== "RIGHT") nextDirection2 = "LEFT";
+        await connection.invoke("Mover", player1Name, "Izquierda")
     } else if (key === "ArrowRight") {
-        if (direction2 !== "LEFT") nextDirection2 = "RIGHT";
+        await connection.invoke("Mover", player1Name, "Derecha")
     }
 }
