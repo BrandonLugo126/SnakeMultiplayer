@@ -71,6 +71,10 @@ connection.on("JuegoIniciado", (nombreJugador2,tablero) => {
 
 });
 
+connection.on("TableroActualizado", (tablero) => {
+    drawGame(tablero);
+});
+
 async function  startGame() {
     player1Name = document.getElementById("player1Name").value.trim();
     await connection.invoke("conectar", player1Name);

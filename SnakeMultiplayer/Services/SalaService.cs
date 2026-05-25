@@ -1,4 +1,6 @@
-﻿using SnakeMultiplayer.Models;
+﻿using Microsoft.AspNetCore.SignalR;
+using SnakeMultiplayer.Hubs;
+using SnakeMultiplayer.Models;
 using System.Collections.Concurrent;
 using System.Drawing;
 
@@ -10,6 +12,12 @@ namespace SnakeMultiplayer.Services
         public static ConcurrentDictionary<string, string> JugadorEspera { get; set; } = new ConcurrentDictionary<string, string>();
         public static ConcurrentDictionary<string, Timer> Timer { get; set; } = new ConcurrentDictionary<string, Timer>();
 
+        private readonly IHubContext<GameHub> hub;
+        public SalaService(IHubContext<GameHub> hub)
+        {
+            this.hub = hub;
+
+        }
         public Sala? BuscarSala(string id, string nombre)
         {
             if (JugadorEspera.ContainsKey(id))
@@ -55,30 +63,28 @@ namespace SnakeMultiplayer.Services
 
             CrearComida(sala);
 
-            var timer = new Timer((x) =>
+            var timer = new Timer(async (x) =>
             {
-                MoverSerpientes(sala);
+                await MoverSerpientesAsync(sala);
             }, null, 100, 500);
 
             Timer[sala.IdSala] = timer;
 
         }
 
-        public event Action<Sala>? TableroActualizado;
 
-        public void MoverSerpientes(Sala sala)
+        public async Task MoverSerpientesAsync(Sala sala)
         {
             var S1 = sala.Tablero.Serpiente1;
             var S2 = sala.Tablero.Serpiente2;
 
             //BorrarLacolas
-            S1.RemoveAt(S1.Count - 1);
-            S2.RemoveAt(S2.Count - 1);
+           
+           
 
             //Avanzar la serpiente 
 
             var nuevo = new Point(S1[0].X, S1[0].Y);
-            S1.Insert(0, nuevo);
 
             switch (sala.Tablero.Direccion1)
             {
@@ -96,9 +102,11 @@ namespace SnakeMultiplayer.Services
                     nuevo.Y++;
                     break;
             }
+            S1.Insert(0, nuevo);
 
+            S1.RemoveAt(S1.Count - 1);
             var nuevo2 = new Point(S2[0].X, S2[0].Y);
-            S2.Insert(0, nuevo2);
+           
             switch (sala.Tablero.Direccion2)
             {
                 case Direccion.Derecha:
@@ -114,10 +122,15 @@ namespace SnakeMultiplayer.Services
                     nuevo2.Y++;
                     break;
             }
+            S2.Insert(0, nuevo2);
+            S2.RemoveAt(S2.Count - 1);
 
             //Checar Colisiones
 
-            TableroActualizado?.Invoke(sala);
+
+            await hub.Clients.Client(sala.IdJugador1 ?? "").SendAsync("TableroActualizado", sala.Tablero);
+         
+            await hub.Clients.Client(sala.IdJugador2 ?? "").SendAsync("TableroActualizado", sala.Tablero);
         }
 
         public void CrearComida(Sala sala)
