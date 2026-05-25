@@ -85,11 +85,12 @@ async function  startGame() {
     // document.getElementById("menu").style.display = "none";
     // document.getElementById("game").style.display = "block";
 
- 
+
 
     // initGame();
     // gameLoop = setInterval(updateGame, 150);
     // 
+    //
 }
 
 function backToMenu() {
