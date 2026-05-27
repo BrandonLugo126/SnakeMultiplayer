@@ -72,6 +72,10 @@ connection.on("JuegoIniciado", (nombreJugador2,tablero) => {
 
 });
 
+connection.on("JugadorPerdio", (Jugador) => {
+   endGame(Jugador)
+});
+
 connection.on("TableroActualizado", (tablero) => {
     drawGame(tablero);
 });
@@ -94,14 +98,7 @@ async function  startGame() {
 }
 
 function backToMenu() {
-    if (gameLoop) {
-        clearInterval(gameLoop);
-        gameLoop = null;
-    }
-    gameRunning = false;
-    document.getElementById("menu").style.display = "block";
-    document.getElementById("game").style.display = "none";
-    document.getElementById("message").innerHTML = "";
+    location.reload();
 }
 
 function initGame() {

@@ -10,7 +10,7 @@ namespace SnakeMultiplayer.Services
     {
         public static ConcurrentDictionary<string, Sala> Salas { get; set; } = new ConcurrentDictionary<string, Sala>();
         public static ConcurrentDictionary<string, string> JugadorEspera { get; set; } = new ConcurrentDictionary<string, string>();
-        public static ConcurrentDictionary<string, Timer> Timer { get; set; } = new ConcurrentDictionary<string, Timer>();
+        public static ConcurrentDictionary<string, Timer> Timers { get; set; } = new ConcurrentDictionary<string, Timer>();
 
         private readonly IHubContext<GameHub> hub;
         public SalaService(IHubContext<GameHub> hub)
@@ -71,9 +71,9 @@ namespace SnakeMultiplayer.Services
             var timer = new Timer(async (x) =>
             {
                 await MoverSerpientesAsync(sala);
-            }, null, 100, 500);
+            }, null, 100, 200);
 
-            Timer[sala.IdSala] = timer;
+            Timers[sala.IdSala] = timer;
 
         }
 
@@ -107,9 +107,7 @@ namespace SnakeMultiplayer.Services
                     nuevo.Y++;
                     break;
             }
-            S1.Insert(0, nuevo);
-
-            S1.RemoveAt(S1.Count - 1);
+          
             var nuevo2 = new Point(S2[0].X, S2[0].Y);
            
             switch (sala.Tablero.Direccion2)
@@ -127,15 +125,85 @@ namespace SnakeMultiplayer.Services
                     nuevo2.Y++;
                     break;
             }
-            S2.Insert(0, nuevo2);
-            S2.RemoveAt(S2.Count - 1);
+
+
+          
 
             //Checar Colisiones
 
+            //colision contra la pared
+            if (nuevo.X <0 || nuevo.Y<0 || nuevo.X >= sala.Tablero.Ancho || nuevo.Y >= sala.Tablero.Largo)
+            {
+                sala.Tablero.Terminado = true;
+                await hub.Clients.Clients([sala.IdJugador1??"", sala.IdJugador2??""]).SendAsync("JugadorPerdio",sala.NombreJugador1);
+            }
+            if (nuevo2.X < 0 || nuevo2.Y < 0 || nuevo2.X >= sala.Tablero.Ancho || nuevo2.Y >= sala.Tablero.Largo)
+            {
+                sala.Tablero.Terminado = true;
+                await hub.Clients.Clients([sala.IdJugador1??"", sala.IdJugador2??""]).SendAsync("JugadorPerdio",sala.NombreJugador1);
+            }
 
-            await hub.Clients.Client(sala.IdJugador1 ?? "").SendAsync("TableroActualizado", sala.Tablero);
-         
-            await hub.Clients.Client(sala.IdJugador2 ?? "").SendAsync("TableroActualizado", sala.Tablero);
+
+            //colision contra otra serpiente
+
+            if (S1.Contains(nuevo)||S2.Contains(nuevo))
+            {
+                sala.Tablero.Terminado = true;
+                await hub.Clients.Clients([sala.IdJugador1 ?? "", sala.IdJugador2 ?? ""]).SendAsync("JugadorPerdio", sala.NombreJugador1);
+
+            }
+            if (S2.Contains(nuevo2) || S2.Contains(nuevo2))
+            {
+                sala.Tablero.Terminado = true;
+                await hub.Clients.Clients([sala.IdJugador1 ?? "", sala.IdJugador2 ?? ""]).SendAsync("JugadorPerdio", sala.NombreJugador1);
+
+            }
+
+
+            //colision con la comida
+
+            if (sala.Tablero.Manzana==nuevo)
+            {
+                sala.Tablero.Puntos1++;
+                CrearComida(sala);
+            }
+
+            if (sala.Tablero.Manzana == nuevo2)
+            {
+                sala.Tablero.Puntos2++;
+                CrearComida(sala);
+            }
+
+
+            if (S1.Count() > 3*sala.Tablero.Puntos1) {
+                S1.RemoveAt(S1.Count - 1);
+
+            }
+
+
+            if (S2.Count() > 3 * sala.Tablero.Puntos1)
+            {
+                S2.RemoveAt(S2.Count - 1);
+
+            }
+
+            S1.Insert(0, nuevo);
+            S2.Insert(0, nuevo2);
+
+            if (!sala.Tablero.Terminado)
+            {
+                await hub.Clients.Client(sala.IdJugador1 ?? "").SendAsync("TableroActualizado", sala.Tablero);
+
+                await hub.Clients.Client(sala.IdJugador2 ?? "").SendAsync("TableroActualizado", sala.Tablero);
+            }
+            else {
+
+                Timers[sala.IdSala].Dispose();
+                Timers.TryRemove(sala.IdSala, out Timer? t);
+                Salas.TryRemove(sala.IdSala, out Sala? s);
+            }
+          
+
         }
 
         public void CrearComida(Sala sala)
